@@ -99,13 +99,7 @@ hash(Hash, _Data) ->
 -spec pad(Data :: binary(), MinSize :: non_neg_integer(),
           PadByte :: integer()) -> binary().
 pad(Data, MinSize, PadByte) ->
-    case byte_size(Data) of
-        N when N >= MinSize ->
-            Data;
-        N ->
-            PadData = << <<PadByte:8>> || _ <- lists:seq(1, MinSize - N) >>,
-            <<Data/binary, PadData/binary>>
-    end.
+  enoise_crypto_basics:pad(Data, MinSize, PadByte).
 
 -spec hashlen(Hash :: enoise_sym_state:noise_hash()) -> non_neg_integer().
 hashlen(sha256)  -> 32;
@@ -133,6 +127,8 @@ hmac_format_key(Hash, Key0, Pad, BLen) ->
             false -> hash(Hash, Key0)
         end,
     Key2 = pad(Key1, BLen, 0),
-    <<PadWord:32>> = <<Pad:8, Pad:8, Pad:8, Pad:8>>,
-    << <<(Word bxor PadWord):32>> || <<Word:32>> <= Key2 >>.
+    enoise_crypto_basics:padding(Key2, Pad).
+
+%%    <<PadWord:32>> = <<Pad:8, Pad:8, Pad:8, Pad:8>>,
+%%    << <<(Word bxor PadWord):32>> || <<Word:32>> <= Key2 >>.
 
